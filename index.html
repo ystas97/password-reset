@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Reset Password - Hoba Events</title>
+    <!-- Добавляем правильную версию Supabase клиента -->
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
     <style>
         body {
             font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -89,6 +91,12 @@
         const error = document.getElementById('error');
         const submitButton = document.getElementById('submitButton');
 
+        // Создаем клиент Supabase правильным способом
+        const supabase = supabase.createClient(
+            'https://wpfomxqqnjqitndqtcyg.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwZm9teHFxbmpxaXRuZHF0Y3lnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIxNzk2NDQsImV4cCI6MjA0Nzc1NTY0NH0.ekGWNbZkhKFoM6txDlUTSa60017W4V770yi-_o8ZzPg'
+        );
+
         // Получаем токен из URL
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token');
@@ -108,18 +116,19 @@
             submitButton.disabled = true;
 
             try {
-                const supabase = createClient(
-                    'https://wpfomxqqnjqitndqtcyg.supabase.co',
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwZm9teHFxbmpxaXRuZHF0Y3lnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzIxNzk2NDQsImV4cCI6MjA0Nzc1NTY0NH0.ekGWNbZkhKFoM6txDlUTSa60017W4V770yi-_o8ZzPg'
+                // Обновляем пароль с использованием токена
+                const { data, error: updateError } = await supabase.auth.updateUser(
+                    { password: password },
+                    { headers: { Authorization: `Bearer ${token}` } }
                 );
 
-                await supabase.auth.updateUser({ password: password });
+                if (updateError) throw updateError;
                 
                 // Показываем сообщение об успехе
                 alert('Password successfully updated');
                 
-                // Закрываем окно
-                window.close();
+                // Перенаправляем на страницу входа в приложение
+                window.location.href = 'com.Hoba.Events://auth/login';
             } catch (err) {
                 error.textContent = err.message;
                 error.style.display = 'block';
